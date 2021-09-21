@@ -8,5 +8,5 @@ lint:
 git:
 	git add .
 	git rm -r --cached .idea bin config/config_dev.go
-	git commit -m "($a)"
+	git commit -m "$a"
 	git push -u origin main
