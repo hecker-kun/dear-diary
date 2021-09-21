@@ -8,20 +8,20 @@ import (
 	"github.com/baryon-m/dear-diary/domain/entity/diary"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"time"
-	_ "github.com/lib/pq"
 )
 
 func main() {
 	psql := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		config.DB_HOST,
-		config.DB_PORT,
-		config.DB_USER,
-		config.DB_PASSWORD,
-		config.DB_DATABASE,
+		config.DbHost,
+		config.DbPort,
+		config.DbUser,
+		config.DbPassword,
+		config.DbDatabase,
 	)
 	db, err := sql.Open("postgres", psql)
 	if err != nil {

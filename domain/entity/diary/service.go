@@ -20,6 +20,14 @@ func (s *Service) Create(e *Entry) (entity.ID, error) {
 	return s.repo.Create(e)
 }
 
+func (s *Service) Delete(id entity.ID) error {
+	return s.repo.Delete(id)
+}
+
 func (s *Service) FetchOne(id entity.ID) (*Entry, error) {
 	return s.repo.FetchOne(id)
+}
+
+func (s *Service) FetchAll() ([]*Entry, error) {
+	return s.repo.FetchAll()
 }

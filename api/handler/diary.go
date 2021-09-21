@@ -51,9 +51,33 @@ func createEntry(service diary.UseCase) http.Handler {
 	})
 }
 
+func deleteEntry(service diary.UseCase) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		errMessage := "Error when deleting a diary entry"
+		vars := mux.Vars(r)
+
+		id, err := entity.StringToID(vars["id"])
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(errMessage))
+			return
+		}
+
+		err = service.Delete(id)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(errMessage))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		return
+	})
+}
+
 func fetchOneEntry(service diary.UseCase) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		errMessage := "Error fethcing diary entry"
+		errMessage := "Error fetching diary entry"
 		vars := mux.Vars(r)
 
 		id, err := entity.StringToID(vars["id"])
@@ -90,7 +114,42 @@ func fetchOneEntry(service diary.UseCase) http.Handler {
 	})
 }
 
+func fetchAllEntries(service diary.UseCase) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		errMessage := "Error fetching a list of diary entries"
+
+		data, err := service.FetchAll()
+		w.Header().Set("Content-Type", "application/json")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(errMessage + "- error Content-Type set"))
+			return
+		}
+
+		if data == nil {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(errMessage + "- data is nil"))
+			return
+		}
+
+		var toJSON = struct {
+			Entries []*diary.Entry
+		}{}
+		for _, e := range data {
+
+			toJSON.Entries = append(toJSON.Entries, e)
+		}
+
+		if err := json.NewEncoder(w).Encode(toJSON); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(errMessage + "- JSON Encoding error"))
+		}
+	})
+}
+
 func MakeDiaryHandlers(r *mux.Router, service diary.UseCase) {
 	r.Handle("/diary", createEntry(service)).Methods("POST").Name("createEntry")
 	r.Handle("/diary/{id}", fetchOneEntry(service)).Methods("GET").Name("fetchOneEntry")
+	r.Handle("/diary", fetchAllEntries(service)).Methods("GET").Name("fetchAllEntries")
+	r.Handle("/diary/{id}", deleteEntry(service)).Methods("DELETE").Name("deleteEntry")
 }
