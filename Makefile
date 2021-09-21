@@ -9,4 +9,4 @@ git:
 	git add .
 	git rm -r --cached .idea bin config/config_dev.go
 	git commit -m "$a"
-	git push -u origin main
+	git push -u --force origin main
